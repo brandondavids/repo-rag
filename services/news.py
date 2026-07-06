@@ -105,7 +105,7 @@ class NewsDigestService:
                 f"  Source: {item.source} | Published: {item.published_at:%d-%m-%Y %H:%M UTC}"
                 f"{summary}"
             )
-        return "\n".join(lines)
+        return "\n\n".join(lines)
         
     @staticmethod
     def _entry_datetime(entry: object) -> datetime | None:

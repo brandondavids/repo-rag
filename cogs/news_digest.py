@@ -28,7 +28,12 @@ async def _send_long(destination: discord.abc.Messageable, text: str) -> None:
         else:
             if current:
                 chunks.append(current)
-            current = block
+            # if a single block exceeds limit, add it as-is rather than losing it
+            if len(block) > MAX_DISCORD_MESSAGE:
+                chunks.append(block)
+                chunks.current = ""
+            else:
+                current = block
     if current:
         chunks.append(current)
     for chunk in chunks or ["No news digest output."]:
