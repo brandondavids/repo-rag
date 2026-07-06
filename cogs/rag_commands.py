@@ -8,6 +8,7 @@ from discord.ext import commands
 
 MAX_DISCORD_MESSAGE = 1900
 
+# owner only function
 def is_owner_allowed(
     interaction: discord.Interaction,
     owner_id: int,
@@ -40,6 +41,45 @@ async def _send_long(interaction: discord.Interaction, text: str, ephemeral: boo
 class RagCommands(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        if message.author.bot:
+            return
+        if self.bot.user not in message.mentions:
+            return
+        if message.author.id != self.bot.settings.discord_owner_id: # owner only condition
+            await message.reply("Access denied, this bot is owner-only!", ephemeral=True)
+            return
+        
+        query = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
+        if not query:
+            await message.reply("Hallo! Ask me something!")
+            return
+        
+        async with message.channel.typing():
+            answer = await asyncio.to_thread(self.bot.rag_engine.ask, query, 5)
+        
+        # text split
+        chunks: list[str] = []
+        current = ""
+        for block in answer.split("\n\n"):
+            candidate = f"{current}\n\n{block}" if current else block
+            if len(candidate) <= MAX_DISCORD_MESSAGE:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current)
+                if len(block) > MAX_DISCORD_MESSAGE:
+                    chunks.append(block)
+                    current = ""
+                else:
+                    current = block
+        if current:
+            chunks.append(current)
+
+        for chunk in chunks or ["No output."]:
+            await message.reply(chunk)
 
     @app_commands.command(name="ask", description="Ask a question using your private knowledge base.")
     @app_commands.describe(query="The question to answer from your indexed documents.")
