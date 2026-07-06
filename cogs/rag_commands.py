@@ -50,10 +50,10 @@ class RagCommands(commands.Cog):
             self.bot.settings.discord_guild_id,
         )
         if not allowed:
-            await interaction.response.send_message(reason, ephemeral=True)
+            await interaction.response.send_message(reason)
             return
         
-        ephemeral = interaction.guild is not None
+        ephemeral = False
         await interaction.response.defer(thinking=True, ephemeral=ephemeral)
         answer = await asyncio.to_thread(self.bot.rag_engine.ask, query, 5)
         await _send_long(interaction, answer, ephemeral=ephemeral)
@@ -70,7 +70,7 @@ class RagCommands(commands.Cog):
             await interaction.response.send_message(reason, ephemeral=True)
             return
 
-        ephemeral = interaction.guild is not None
+        ephemeral = False
         await interaction.response.defer(thinking=True, ephemeral=ephemeral)
         results = await asyncio.to_thread(self.bot.rag_engine.retrieve, query, 5)
         if not results:
@@ -100,7 +100,7 @@ class RagCommands(commands.Cog):
             await interaction.response.send_message(reason, ephemeral=True)
             return
         
-        ephemeral = interaction.guild is not None
+        ephemeral = False
         await interaction.response.defer(thinking=True, ephemeral=ephemeral)
         results = await asyncio.to_thread(self.bot.ingestion_manager.ingest_directory)
         if not results:
