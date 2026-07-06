@@ -77,8 +77,8 @@ class NewsDigest(commands.Cog):
     async def before_daily_digest(self) -> None:
         await self.bot.wait_until_ready()
 
-    @app_commands.command(name="news_now", description="Send the latest configured news digest now.")
-    async def news_now(self, interaction: discord.Interaction) -> None:
+    @app_commands.command(name="latestnews", description="Send the latest news digest manually.")
+    async def latestnews(self, interaction: discord.Interaction) -> None:
         if interaction.user.id != self.bot.settings.discord_owner_id:
             await interaction.response.send_message("Access denied, this bot is owner-only!", ephemeral=True)
             return
