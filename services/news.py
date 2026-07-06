@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import calendar
+from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from html import unescape
@@ -23,18 +24,22 @@ class NewsDigestService:
         categories: dict[str, list[str]],
         lookback_hours: int = 24,
         max_items_per_category: int = 8,
+        display_tz: ZoneInfo | None = None,
     ) -> None:
         self.categories = categories
         self.lookback_hours = lookback_hours
         self.max_items_per_category = max_items_per_category
+        self.display_tz = display_tz or timezone.utc
 
     def build_digest(self, now: datetime | None = None) -> str:
         now = now or datetime.now(timezone.utc)
         cutoff = now - timedelta(hours=self.lookback_hours)
+        display_now = now.astimezone(self.display_tz)
+        display_cutoff = cutoff.astimezone(self.display_tz)
 
         sections: list[str] = [
-            f"Daily news digest from the past {self.lookback_hours} hours",
-            f"Window: {cutoff:%d-%m-%Y %H:%M UTC} to {now:%d-%m-%Y %H:%M UTC}",
+            f"# Daily news (Past {self.lookback_hours} Hours)",
+            f"Window: {display_cutoff:%d-%m-%Y %H:%M UTC} to {display_now:%d-%m-%Y %H:%M UTC}",
         ]
 
         for category, feed_urls in self.categories.items():
@@ -102,7 +107,7 @@ class NewsDigestService:
             summary = f"\n  {item.summary[:220]}" if item.summary else ""
             lines.append(
                 f"{index}. [{item.title}]({item.url})\n"
-                f"  Source: {item.source} | Published: {item.published_at:%d-%m-%Y %H:%M UTC}"
+                f"  Source: {item.source} | Published: {item.published_at.astimezone(self.display_tz):%d-%m-%Y %H:%M} (GMT+7)"
                 f"{summary}"
             )
         return "\n\n".join(lines)

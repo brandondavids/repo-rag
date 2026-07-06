@@ -13,6 +13,8 @@ from services.news import NewsDigestService
 from services.rag_engine import RagEngine
 from services.splitter import RecursiveTextSplitter
 
+from zoneinfo import ZoneInfo
+
 class RepoBot(commands.Bot):
     def __init__(self, settings: Settings) -> None:
         intents = discord.Intents.default()
@@ -44,6 +46,7 @@ class RepoBot(commands.Bot):
             },
             lookback_hours=settings.news_lookback_hours,
             max_items_per_category=settings.news_max_items_per_category,
+            display_tz=ZoneInfo(settings.news_timezone)
         )
 
     async def setup_hook(self) -> None:
