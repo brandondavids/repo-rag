@@ -4,5 +4,5 @@ A personal AI-assistant Discord bot "Repo" that combines an LLM with Retrieval-A
 ### Known bugs:
 - Does not have memory of chats in Discord
 ### TODO:
-- [x] Add example `env`, `knowledge_db`, and `docs_source`
+- [ ] Add example `env`, `knowledge_db`, and `docs_source`
 - [ ] Implement context memory from bot's Discord chats with user
